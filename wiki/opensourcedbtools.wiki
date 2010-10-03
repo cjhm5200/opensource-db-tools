@@ -1,4 +1,4 @@
-#summary One-sentence summary of this page.
+#summary opensource-db-tools - A set of open source tools for MySQL
 #labels mysql,opensource,opensource-db-tools,geeks,database,postgresql,python
 
 = Introduction =
