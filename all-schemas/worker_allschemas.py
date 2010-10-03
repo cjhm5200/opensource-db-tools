@@ -1,4 +1,4 @@
-import time, MySQLdb, gearman, json, argparse, os, sys
+import time, MySQLdb, gearman, json, argparse, os, sys, daemon
 import logging, logging.handlers, logging.config
 
 
@@ -49,13 +49,17 @@ if __name__ == "__main__":
                                      epilog='TEXT TO display after the help message')
     parser.add_argument('-g', '--gearman-servers',  action='store', nargs='+', default=['localhost:4730'],
                         help="Gearman servers list. Default: %(default)s", dest='gearman_servers')
-    parser.add_argument('-q', '--quiet',    action='store_const', const=True, default=False, dest='quiet')
+    parser.add_argument('-d', '--daemonize',    action='store_const', const=True, default=False, dest='daemonize', 
+                        help='Daemonizes this worker to run as a deamon in the background and perform tasks for clients. Default: %(default)s')
     parser.add_argument('--version',        action='version', version='%(prog)s 0.1a')
 
     cmd = parser.parse_args()
     logging.config.fileConfig("logging.conf")
     my_logger = logging.getLogger("mainModule")
     logging.debug("Program called with the following arguments:\n%s" % str(cmd))
+    if cmd.daemonize:
+        try: daemon.daemonize()
+        except Error, DaemonException: print "Couldn't daemonize process"
     try: 
         logging.info("Connecting to gearman server(s)")
         gm_worker = gearman.GearmanWorker(cmd.gearman_servers)
