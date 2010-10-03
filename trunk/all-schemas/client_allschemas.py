@@ -30,8 +30,8 @@ def check_request_status(job_request, unique_file_4_dbs, no_results_header):
         else:
             print ""
             print output
-    elif job_request.timed_out: logging.debug("Job %s timed out!" % str(job_request))
-    elif job_request.state == JOB_UNKNOWN: logging.debug("Job %s connection failed!" % str(job_request))
+    elif job_request.timed_out: logging.error("Job %s timed out!" % str(job_request))
+    elif job_request.state == JOB_UNKNOWN: logging.error("Job %s connection failed!" % str(job_request))
 
 
 def genHeader(header, count, affected):
@@ -56,7 +56,6 @@ if __name__ == "__main__":
     parser.add_argument('-f', '--fields-separator',     action='store', nargs=1, default=['\t'],
                         help="Feilds in the resultsets are separated by this character. Default: 'tab delimited'", dest='fields_separator')
     parser.add_argument('-d', '--dry-run',  action='store_const', const=True, default=False, help='No-act', dest='dry_run')
-    parser.add_argument('-q', '--quiet',    action='store_const', const=True, default=False, dest='quiet')
     parser.add_argument('--version',        action='version', version='%(prog)s 0.1a')
     parser.add_argument('--unique-files-per-database', action='store_const', const=True, default=False, dest='unique_file_4_dbs',
                         help="Creates or appends to(if already exists) a unique output file for each database. Default: '%(default)s'")
