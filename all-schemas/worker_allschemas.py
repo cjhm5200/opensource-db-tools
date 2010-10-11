@@ -1,4 +1,4 @@
-import time, MySQLdb, gearman, json, argparse, os, sys, daemon
+import MySQLdb, gearman, json, argparse, sys, daemon
 import logging, logging.handlers, logging.config
 
 
@@ -45,8 +45,7 @@ def all_schemas(gearman_worker, gearman_job):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Runs SQL on all databases on a server.',
-                                     epilog='TEXT TO display after the help message')
+    parser = argparse.ArgumentParser(description='Runs SQL on all databases on a server.',epilog='')
     parser.add_argument('-g', '--gearman-servers',  action='store', nargs='+', default=['localhost:4730'],
                         help="Gearman servers list. Default: %(default)s", dest='gearman_servers')
     parser.add_argument('-d', '--daemonize',    action='store_const', const=True, default=False, dest='daemonize', 
