@@ -75,7 +75,13 @@ if __name__ == "__main__":
     logging.config.fileConfig("logging.conf")
     my_logger = logging.getLogger("mainModule")
     logging.debug("Program called with the following arguments:\n%s" % str(cmd))
-    gm_client = gearman.GearmanClient(cmd.gearman_servers)
+    try:
+        logging.info("Connecting to gearman server(s)")
+        gm_client = gearman.GearmanClient(cmd.gearman_servers)
+        logging.info("Connected to Gearman job server successfully ..")
+    except (gearman.errors, gearman.errors.ServerUnavailable):
+        logging.error("Error connecting to Gearman server: " + str(sys.exc_info()[0]))
+        exit(0)
     sql = "SHOW DATABASES LIKE '%s'" %  cmd.include_dbs[0]
     try: conn = MySQLdb.connect(host=hostname, port=cmd.port[0], user=cmd.user[0], passwd=cmd.password[0], db="mysql")
     except MySQLdb.MySQLError:
@@ -110,9 +116,13 @@ if __name__ == "__main__":
     cursor.close()
     conn.close()
     if cmd.dry_run: exit(0)
-    submitted_requests = gm_client.submit_multiple_jobs(list_of_jobs, background=False, wait_until_complete=False)
+    try:
+        submitted_requests = gm_client.submit_multiple_jobs(list_of_jobs, background=False, wait_until_complete=False)
+        completed_requests = gm_client.wait_until_jobs_completed(submitted_requests, poll_timeout=5.0)
+    except (gearman.errors, gearman.errors.ServerUnavailable):
+        logging.error("Error connecting to Gearman server: " + str(sys.exc_info()[0]))        
+        exit(0)
     time.sleep(1.0)
-    completed_requests = gm_client.wait_until_jobs_completed(submitted_requests, poll_timeout=5.0)
     for completed_job_request in completed_requests:
         check_request_status(completed_job_request, cmd.unique_file_4_dbs, cmd.no_results_header)
     logging.info("Took %s seconds to process %s databases, ignored %s databases, and ran %s queries on each database processed" % (str(time.clock() - start), dbs_worked_on/len(cmd.command), str(dbs_ignored/len(cmd.command)), str(len(cmd.command))))
